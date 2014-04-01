@@ -1,0 +1,993 @@
+// exportMesh(outFileName)
+// exportAnim(outFileName)
+// Heavily modified/rewritten by Sanjay Madhav for University of Southern California
+
+// Copyright 2006 by Denis Schluchter (dschluchter@dplanet.ch) 
+// Use at your own risk, Source code is provided as is.
+// This source is Freeware and may be modified and used in any way suitable. 
+// The code and any derivations may not be sold and or licensed to a
+// third party. Any distribution of the following source code and 
+// derivations must contain this license. 
+
+// return PathB relative to PathA
+// i.e.
+// getRelativePath("c:\\data\\mesh\\mymesh.ma","c:\\data\\texture\\mytexture.dds");
+// // Result: ..\texture\mytexture.dds //
+proc string getRelativePath(string $pathA, string $pathB)
+{
+	string $nPathA[] = stringToStringArray(fromNativePath($pathA),"/");
+	string $nPathB[] = stringToStringArray(fromNativePath($pathB),"/");
+	string $returnPath = "";
+
+	// when in a Windows environment, make the drive letter upper case
+	if (endsWith($nPathA[0],":"))
+	{
+		$nPathA[0] = toupper($nPathA[0]);
+		$nPathB[0] = toupper($nPathB[0]);	
+	}
+	
+	int $i=0;
+	while ($nPathA[$i] == $nPathB[$i])
+	{
+		$i++;
+	}
+	
+	int $bSize = size($nPathB);
+	int $aSize = size($nPathA);
+	int $depthB = $bSize - $i;
+	int $depthA = $aSize - $i;
+	if ($i == 0)
+		return $pathB;
+	$i = 0;
+
+	if ($depthA > 1 || $depthB > 1)
+	{
+		$i += $depthA - 1;
+		
+		while ($i > 0)
+		{
+			$returnPath += "../";
+			$i --;
+		}
+	}
+	$i = $depthB;
+	while ($i > 0)
+	{
+		$returnPath += $nPathB[$bSize - $i];
+		if ($i > 1)
+			$returnPath += "/";
+		$i --;
+	}
+
+	return toNativePath($returnPath);
+}
+
+//usage:
+//int $fileId = `fopen "myMaterial.ogl" "w"`;
+//writeMaterial("c:\data\material",$fileId, 0); 
+proc writeMaterial(string $fileName, int $fileId, int $infoMessages)
+{
+	string $temp[];
+	$temp = `listRelatives -shapes`;
+	$temp = `listConnections -source true -type shadingEngine $temp[0]`;
+	string $shader[] = `listNodeTypes "shader"`;
+	int $i=0;
+	while($i < size($shader))
+	{
+		string $obj[] = `listConnections -source true -destination false -exactType true -type $shader[$i] $temp[0]`;
+		if (size($obj))
+		{
+			// write header
+			/*fwrite $fileId 0x21;	// OGL_OBJECT_INDEXED 
+			fwrite $fileId 0x60;	// OGL_OBJECT_MATERIAL_INFO
+			fwrite $fileId 0x1;		// object size (one material)
+			fwrite $fileId 0xff00;		// id, type
+			
+			int $size = size($obj[0]);
+			fwrite $fileId $size; // Material name length
+			fwrite $fileId $obj[0];	// Material Name
+
+			if ($infoMessages)
+				print  ("\n" + "shader (" + $shader[$i] + ", "+$i +"): " + $obj[0] + "\n");
+			vector $ambientColor = `getAttr($obj[0] + ".ambientColor")`;
+			
+			// write light data
+			fwrite $fileId $ambientColor;
+		
+			vector $color = `getAttr($obj[0] + ".color")`;*/
+
+			string $file[] = `listConnections -source true -destination false -type file $obj[0]`;			
+			/*vector $tempVect;
+			if (!size($file))
+			{
+				$tempVect = $color*`getAttr($obj[0] + ".diffuse")`;
+			}
+			else
+			{
+				float $d = `getAttr($obj[0] + ".diffuse")`;
+				$tempVect = {$d,$d,$d};
+			}
+
+			fwrite $fileId $tempVect;
+
+			print ("Ambient: " + $ambientColor + "\n");
+			print ("Diffuse: " + $tempVect + "\n");
+			
+			// specular				
+			if (`objExists($obj[0] + ".specularColor")`)
+			{
+				string $attr[] = `listAttr($obj[0] + ".specularColor")`;
+				$tempVect = `getAttr($obj[0] + ".specularColor")`;
+			}
+			else
+			{
+				print ("Attention! The current shader has no specular value! Use a Blinn or Phong material.\n");
+			}
+			
+			print ("Specular: " + $tempVect + "\n");
+			
+			
+			fwrite $fileId $tempVect;			
+			$tempVect = (`getAttr($obj[0] + ".transparency")`);
+			float $transparency = mag($tempVect) / 1.732050807;
+			print ("Transparency: " + $transparency + "\n");
+			fwrite $fileId $transparency;
+
+			// shininess
+			float $power = 20.0;
+			if (`objExists($obj[0] + ".cosinePower")`)
+				$power = (`getAttr($obj[0] + ".cosinePower")`);
+			else
+				print ("Attention! The current shader has no cosine power (shininess) value! Use a Phong material.\n");
+
+			print ("Shininess: " + $power+ "\n");
+			fwrite $fileId $power;*/
+			
+			if (size($file))
+			{			
+				// write texture info
+				string $textureName = `getAttr ($file[0] + ".fileTextureName")`;
+				string $pathArray[] = stringToStringArray($textureName,"/");
+				$idx = size($pathArray) - 1;
+				//$textureName = getRelativePath($fileName,$textureName);
+				print ("texture: " + $textureName + "\n");
+				/*fwrite $fileId 0x3B; // OGL_OBJECT_TEXTUREINFO
+				fwrite $fileId `size($textureName)`; // texture name length
+				fwrite $fileId $textureName; // texture name 
+				fwrite $fileId 1; // u
+				fwrite $fileId 1; // t*/
+				fprint $fileId "\t<texture>";
+				fprint $fileId $pathArray[$idx];
+				fprint $fileId "</texture>\n";
+			}
+			/*else
+			{
+				print ("no Texture\n");
+				// write an empty texture info
+				fwrite $fileId 0x3A; // OGL_OBJECT_TEXTURE
+				fwrite $fileId 0; // texture name length
+				fwrite $fileId 1; // u
+				fwrite $fileId 1; // t
+			}*/
+				
+		}
+		$i++;
+	}
+}
+
+global proc exportMesh(string $fileName)
+{
+	currentTime(0);
+	// set to one to turn debug messsages on
+	int $debugOut=0;
+	// set to one to turn info messsages on
+	int $infoMessages=0;
+	string $selection[] = `ls -sl`;
+	string $obj;
+	int $objCount = `size $selection`;
+	
+	if ($objCount == 0)
+	{
+		print("Nothing selected");
+	}
+	print("calculating ...\n");
+	// write index data
+	for ( $obj in $selection ) 
+	{ 
+		// write arrays	
+		int $faceVertices[];
+		float $vertexData[];
+		float $normalData[];
+		float $uvData[];
+		float $indexedNormals[];
+		float $indexedUVs[];
+		int $hasUVs = true;
+	
+		string $faceToVertex[] = `polyInfo -faceToVertex`;
+		int $size = `size $faceToVertex`;
+		int $faces = $size;
+		int $vertices = $size*3;
+		int $iter=0;
+		while ($iter<$size)
+		{	
+			string $oneFaceToVertex[];
+			tokenize($faceToVertex[$iter],$oneFaceToVertex);
+			int $x = (int) $oneFaceToVertex[2];
+			$faceVertices[$iter*3] = $x;
+			$x = (int) $oneFaceToVertex[3];
+			$faceVertices[$iter*3+1] = $x;
+			$x = (int) $oneFaceToVertex[4];
+			$faceVertices[$iter*3+2] = $x;
+			if ($debugOut)
+				print("VertexFace: "+$oneFaceToVertex[1] +" VertexIndex:"+ $oneFaceToVertex[2] +", "+ $oneFaceToVertex[3] +", "+ $oneFaceToVertex[4] + "\n");
+			$iter++;
+		}
+		int $pe[] = `polyEvaluate -v`;
+		$size = $pe[0];
+		int $numVertices = $size;
+		int $indexedFaces = $size;
+		$vertices= $size*3;
+		if ($infoMessages)
+			print ("Vertex count : "+ $size + "\n");
+		
+		$iter=0;
+		while ($iter<$size)
+		{
+			string $x  = $obj+".vtx["+$iter+"]"; 
+			float $vtx[] = `pointPosition -w $x`;
+			if ($debugOut)
+				print("Vertex " + $iter + ": " + $vtx[0] +", "+ $vtx[1] +", "+ $vtx[2] + "\n");
+			$vertexData[$iter*3] = $vtx[0];
+			$vertexData[$iter*3+1] = $vtx[1];
+			$vertexData[$iter*3+2] = $vtx[2];
+			$iter++;
+		}
+
+		$iter=0;
+		$size = $faces;
+		float $normal[];
+		if ($infoMessages)
+			print ("Normal count : "+ $size*3 + "\n");
+		string $temp;
+		
+		string $currSelection[] = `ls -sl`;
+		// extract normal data
+		while ($iter<$size)
+		{
+			if ($infoMessages)
+				print("index: " + $iter + "\n");
+			$temp = $obj+".vtxFace["+$faceVertices[$iter*3]+"]["+$iter+"]";
+			select -r $temp;
+			$normal = `polyNormalPerVertex -q -xyz`;
+			$normalData[$iter*9] = $normal[0];
+			$normalData[$iter*9+1] = $normal[1];
+			$normalData[$iter*9+2] = $normal[2];
+			if ($debugOut)
+				print("face " + $iter + ", normal 1: " + $normalData[$iter*9] +", "+ $normalData[$iter*9+1] +", "+ $normalData[$iter*9+2] + "\n");
+			
+			$temp = $obj+".vtxFace["+$faceVertices[$iter*3+1]+"]["+$iter+"]";
+			select -r $temp;
+			$normal = `polyNormalPerVertex -q -xyz`;
+			$normalData[$iter*9+3] = $normal[0];
+			$normalData[$iter*9+4] = $normal[1];
+			$normalData[$iter*9+5] = $normal[2];			
+			if ($debugOut)
+				print("face " + $iter + ", normal 2: " + $normalData[$iter*9+3] +", "+ $normalData[$iter*9+4] +", "+ $normalData[$iter*9+5] + "\n");
+
+			$temp = $obj+".vtxFace["+$faceVertices[$iter*3+2]+"]["+$iter+"]";
+			select -r $temp;
+			$normal = `polyNormalPerVertex -q -xyz`;
+			$normalData[$iter*9+6] = $normal[0];
+			$normalData[$iter*9+7] = $normal[1];
+			$normalData[$iter*9+8] = $normal[2];			
+			if ($debugOut)
+				print("face " + $iter + ", normal 3: " + $normalData[$iter*9+6] +", "+ $normalData[$iter*9+7] +", "+ $normalData[$iter*9+8] + "\n");
+			
+			$iter++;
+		}	
+		if ($infoMessages)
+			print ("UV count : "+ $size*3 + "\n");
+		
+		// extract uv data
+		$iter = 0;
+		float $fArray[];
+		string $sArray[];
+		while ($iter<$size)
+		{			
+			$temp = $obj+".vtxFace["+$faceVertices[$iter*3]+"]["+$iter+"]";
+			select -r $temp;
+			$sArray = `polyListComponentConversion -fromVertexFace -toUV`;
+			if (!size($sArray))
+			{
+				print("No UV's foun\n");
+				$hasUVs = false;
+				break;
+			}
+
+			$fArray = `polyEditUV -q $sArray[0]`;
+			$uvData[$iter*6] = $fArray[0];
+			$uvData[$iter*6+1] = $fArray[1];
+			if ($debugOut)
+				print("face " + $iter + ", uv 1: " + $uvData[$iter*6] + ", " + $uvData[$iter*6+1] + "\n");
+
+			$temp = $obj+".vtxFace["+$faceVertices[$iter*3+1]+"]["+$iter+"]";
+			select -r $temp;
+			$sArray = `polyListComponentConversion -fromVertexFace -toUV`;
+			$fArray = `polyEditUV -q $sArray[0]`;
+			$uvData[$iter*6+2] = $fArray[0];
+			$uvData[$iter*6+3] = $fArray[1];
+			if ($debugOut)
+				print("face " + $iter + ", uv 2: " + $uvData[$iter*6+2] + ", " + $uvData[$iter*6+3] + "\n");
+
+			$temp = $obj+".vtxFace["+$faceVertices[$iter*3+2]+"]["+$iter+"]";
+			select -r $temp;
+			$sArray = `polyListComponentConversion -fromVertexFace -toUV`;
+			$fArray = `polyEditUV -q $sArray[0]`;
+			$uvData[$iter*6+4] = $fArray[0];
+			$uvData[$iter*6+5] = $fArray[1];
+			if ($debugOut)
+				print("face " + $iter + ", uv 3: " + $uvData[$iter*6+4] + ", " + $uvData[$iter*6+5] + "\n");
+
+			$iter++;	
+		}
+
+		// Determine if we have skinning weights
+		string $bones[];
+		float $skin_weights[];
+		float $indexed_sw[];
+		
+		int $skin_indices[];
+		int $indexed_si[];
+		
+		string $skincluster = `findRelatedSkinCluster($obj)`;
+		
+		int $has_skin = false;
+		if ($skincluster != "")
+		{
+			$has_skin = true;
+			$bones = `skinCluster -q -inf`;
+			print ("Number of bones: " + size($bones) + "\n");
+			// Load weights
+			$iter = 0;
+			//print ("List size: " + $size);
+			while ($iter < $size)
+			{
+				int $j;
+				int $num_added;
+				
+				// First vertex
+				$temp = $obj+".vtxFace["+$faceVertices[$iter*3]+"]["+$iter+"]";
+				float $curr_weights[] = `skinPercent -q -v $skincluster $temp`;
+				$num_added = 0;
+				
+				for ($j = 0; $j < size($curr_weights); $j++)
+				{
+					if ($curr_weights[$j] > 0.01)
+					{
+						$skin_weights[$iter*12 + $num_added] = $curr_weights[$j];
+						$skin_indices[$iter*12 + $num_added] = $j;
+						$num_added++;
+					}
+				}
+				
+				while ($num_added < 4)
+				{
+					$skin_weights[$iter*12 + $num_added] = 0.0;
+					$skin_indices[$iter*12 + $num_added] = 0;
+					$num_added++;
+				}
+				
+				// Second Vertex
+				$temp = $obj+".vtxFace["+$faceVertices[$iter*3 + 1]+"]["+$iter+"]";
+				float $curr_weights[] = `skinPercent -q -v $skincluster $temp`;
+				$num_added = 0;
+				
+				for ($j = 0; $j < size($curr_weights); $j++)
+				{
+					if ($curr_weights[$j] > 0.01)
+					{
+						$skin_weights[$iter*12 + $num_added + 4] = $curr_weights[$j];
+						$skin_indices[$iter*12 + $num_added + 4] = $j;
+						$num_added++;
+					}
+				}
+				
+				while ($num_added < 4)
+				{
+					$skin_weights[$iter*12 + $num_added + 4] = 0.0;
+					$skin_indices[$iter*12 + $num_added + 4] = 0;
+					$num_added++;
+				}
+				
+				// Third Vertex
+				$temp = $obj+".vtxFace["+$faceVertices[$iter*3 + 2]+"]["+$iter+"]";
+				float $curr_weights[] = `skinPercent -q -v $skincluster $temp`;
+				$num_added = 0;
+				
+				for ($j = 0; $j < size($curr_weights); $j++)
+				{
+					if ($curr_weights[$j] > 0.01)
+					{
+						$skin_weights[$iter*12 + $num_added + 8] = $curr_weights[$j];
+						$skin_indices[$iter*12 + $num_added + 8] = $j;
+						$num_added++;
+					}
+				}
+				
+				while ($num_added < 4)
+				{
+					$skin_weights[$iter*12 + $num_added + 8] = 0.0;
+					$skin_indices[$iter*12 + $num_added + 8] = 0;
+					$num_added++;
+				}
+				
+				/*if ($iter < 10)
+				{
+					print ("Weights:\n");
+					print ($skin_weights);
+					print ("Indices:\n");
+					print ($skin_indices);
+				}*/
+				
+				$iter++;
+			}
+		}
+		
+		select -r $currSelection;
+		
+		int $markedFaces[];
+		int $indexPos=0;
+		$iter = 0;
+		$size = $faces*3;
+//		$size = $indexedFaces;
+		print ("Number of faces: " + $faces + "\n");
+		print ("Number of vertices: " + $size+ "\n");
+		// compare arrays:	
+		print ("Calulating data: -------------------------------\n");	
+			
+		while ($iter<$size)
+		{
+			$indexPos = $faceVertices[$iter];
+			if ($debugOut)
+				print ("iter: "+$iter+ " Index pos: " + $indexPos + "\n");
+			if ($markedFaces[$indexPos] == 0)
+			{
+				// if this face not yet written, just go on
+				if ($debugOut)
+					print ($indexPos + " write at indexPos : " + $indexPos + "\n");
+				$markedFaces[$indexPos] = 1;
+				$indexedNormals[$indexPos*3] = $normalData[$iter*3];
+				$indexedNormals[$indexPos*3+1] = $normalData[$iter*3+1];
+				$indexedNormals[$indexPos*3+2] = $normalData[$iter*3+2];
+				$indexedUVs[$indexPos*2] = $uvData[$iter*2];
+				$indexedUVs[$indexPos*2+1] = $uvData[$iter*2+1];
+				
+				if ($has_skin)
+				{
+					$indexed_sw[$indexPos*4] = $skin_weights[$iter*4];
+					$indexed_sw[$indexPos*4+1] = $skin_weights[$iter*4+1];
+					$indexed_sw[$indexPos*4+2] = $skin_weights[$iter*4+2];
+					$indexed_sw[$indexPos*4+3] = $skin_weights[$iter*4+3];
+					
+					$indexed_si[$indexPos*4] = $skin_indices[$iter*4];
+					$indexed_si[$indexPos*4+1] = $skin_indices[$iter*4+1];
+					$indexed_si[$indexPos*4+2] = $skin_indices[$iter*4+2];
+					$indexed_si[$indexPos*4+3] = $skin_indices[$iter*4+3];
+				}
+			}else{
+				// check if this vtx/normal/uv combination is the same as the one
+				// already written. If not write a new vtx/normal/uv combination at the
+				// end of the array
+				if ($debugOut)
+					print ("Check face iter: "+ $iter + ", vertex : " + $indexPos + "\n");
+				if (!(($indexedNormals[$indexPos*3]   == $normalData[$iter*3]) &&
+					  ($indexedNormals[$indexPos*3+1] == $normalData[$iter*3+1]) &&
+					  ($indexedNormals[$indexPos*3+2] == $normalData[$iter*3+2]) && 
+					  ($indexedUVs[$indexPos*2]   == $uvData[$iter*2]) &&
+					  ($indexedUVs[$indexPos*2+1] == $uvData[$iter*2+1]) &&
+					  ($vertexData[$indexPos*3]   == $vertexData[$iter*3]) &&
+					  ($vertexData[$indexPos*3+1] == $vertexData[$iter*3+1]) &&
+					  ($vertexData[$indexPos*3+2] == $vertexData[$iter*3+2])
+					))
+					
+				{
+					// also look in all the newly created vtx/normal/uv pairs for a match
+					int $i=0;
+					for( $i=$numVertices;$i<$indexedFaces ;$i++)
+					{
+						if ($debugOut)
+							print ("inner Check face iter: "+ $i + ", vertex : " + $indexPos + "\n");
+						if ((($indexedNormals[$i*3]   == $normalData[$iter*3]) &&
+							 ($indexedNormals[$i*3+1] == $normalData[$iter*3+1]) &&
+							 ($indexedNormals[$i*3+2] == $normalData[$iter*3+2])) && 
+							(($indexedUVs[$i*2]   == $uvData[$iter*2]) &&
+							 ($indexedUVs[$i*2+1] == $uvData[$iter*2+1])) &&
+							(($vertexData[$i*3]   == $vertexData[$indexPos*3]) &&
+							 ($vertexData[$i*3+1] == $vertexData[$indexPos*3+1]) &&
+							 ($vertexData[$i*3+2] == $vertexData[$indexPos*3+2]) ))
+							{
+								$faceVertices[$iter] = $i;
+								if ($debugOut)
+									print("found in newly created vtx/normal/uv pair\n");
+								$iter++;
+								break;
+								
+							}
+					}
+					if ($i<$indexedFaces)
+						continue;
+					if ($infoMessages)
+						print ($indexedFaces + " Not found, writing index: "+$indexPos+"/"+$iter+" at vtxPos: "+$indexedFaces+"\n");
+
+					$indexedNormals[$indexedFaces*3] = $normalData[$iter*3];
+					$indexedNormals[$indexedFaces*3+1] = $normalData[$iter*3+1];
+					$indexedNormals[$indexedFaces*3+2] = $normalData[$iter*3+2];
+
+					$indexedUVs[$indexedFaces*2] = $uvData[$iter*2];
+					$indexedUVs[$indexedFaces*2+1] = $uvData[$iter*2+1];
+
+					$vertexData[$indexedFaces*3] = $vertexData[$indexPos*3];
+					$vertexData[$indexedFaces*3+1] = $vertexData[$indexPos*3+1];
+					$vertexData[$indexedFaces*3+2] = $vertexData[$indexPos*3+2];
+					
+					if ($has_skin)
+					{
+						$indexed_sw[$indexedFaces*4] = $skin_weights[$iter*4];
+						$indexed_sw[$indexedFaces*4+1] = $skin_weights[$iter*4+1];
+						$indexed_sw[$indexedFaces*4+2] = $skin_weights[$iter*4+2];
+						$indexed_sw[$indexedFaces*4+3] = $skin_weights[$iter*4+3];
+						
+						$indexed_si[$indexedFaces*4] = $skin_indices[$iter*4];
+						$indexed_si[$indexedFaces*4+1] = $skin_indices[$iter*4+1];
+						$indexed_si[$indexedFaces*4+2] = $skin_indices[$iter*4+2];
+						$indexed_si[$indexedFaces*4+3] = $skin_indices[$iter*4+3];
+					}
+					
+					$faceVertices[$iter] = $indexedFaces;
+					$indexedFaces++;
+				}
+			}
+			$iter ++;
+		}
+		//print (size($indexed_sw) + "\n");
+		//print ($indexed_sw);
+		//print ("SI\n");
+		//print (size($skin_indices) + "\n");
+		//print ($skin_indices);
+		print ("OutputData: ------------------------------------\n");		
+		print ("Indexed vertices : " + $indexedFaces + "\n");
+		// now write the object data
+		int $size = $indexedFaces;
+		int $vertices = $size;
+	
+		int $fileId = `fopen $fileName "w"`;
+		// WRITE OGL HEADER
+		//fwrite $fileId "OGL";		// OGL File identifier
+		//fwrite $fileId 0x04;		// Version 4
+		//fwrite $fileId $objCount;	// Object count
+		//fwrite $fileId 0x0000;		// Object radius (actually just fill with zero 
+	
+	
+		// create vertex index
+		//fwrite $fileId 0x21;	// OGL_OBJECT_INDEXED 
+		//fwrite $fileId 0x40;	// OGL_OBJECT_COORDINATEINDEX
+		//fwrite $fileId ($faces*3);	// vertex count
+		//fwrite $fileId 0x0004;	// GL_TRIANGLES and Material Id;
+		
+		fprint $fileId "<?xml version='1.0' encoding='UTF-8' ?>\n";
+		fprint $fileId "<itpmesh>\n";
+		if (!$has_skin)
+		{
+			fprint $fileId "\t<!-- position, normal, texture-->\n";
+			fprint $fileId "\t<format>pnt</format>\n";
+		}
+		else
+		{
+			fprint $fileId "\t<!-- position, normal, skinning weights, skinning indices, texture-->\n";
+			fprint $fileId "\t<format>pnst</format>\n";
+		}
+		
+		writeMaterial($fileName,$fileId,0);
+		
+		fprint $fileId "\t<triangles count='";
+		fprint $fileId $faces;
+		fprint $fileId "'>\n";
+		int $iter=0;
+		// write face indicies
+		while ($iter<$faces)
+		{
+			fprint $fileId "\t\t<tri>";
+			fprint $fileId $faceVertices[$iter*3+2];
+			fprint $fileId ",";
+			fprint $fileId $faceVertices[$iter*3+1];
+			fprint $fileId ",";
+			fprint $fileId $faceVertices[$iter*3+0];
+			
+			if ($infoMessages)
+			{
+				print("VertexFace: "+ $iter +" VertexIndex:"+ $faceVertices[$iter*3] +", "+ $faceVertices[$iter*3+1] +", "+ $faceVertices[$iter*3+2] + "\n");
+			}
+			
+			fprint $fileId "</tri>\n";
+			$iter++;
+		}
+		
+		fprint $fileId "\t</triangles>\n";
+
+		/*
+		// create vertex data
+		fwrite $fileId 0x21;	// OGL_OBJECT_INDEXED 
+		fwrite $fileId 0x30;	// OGL_OBJECT_COORDINATES
+		fwrite $fileId $vertices;	// vertex count
+		fwrite $fileId 0x0004;	// GL_TRIANGLES and Material Id;*/
+		
+		fprint $fileId "\t<vertices count='";
+		fprint $fileId $indexedFaces;
+		fprint $fileId "'>\n";
+		
+		$iter=0;
+		while ($iter<$indexedFaces)
+		{
+			fprint $fileId "\t\t<vtx>\n";
+			
+			// position
+			fprint $fileId "\t\t\t<pos>";
+			fprint $fileId $vertexData[$iter*3+0];
+			fprint $fileId ",";
+			fprint $fileId $vertexData[$iter*3+1];
+			fprint $fileId ",";
+			fprint $fileId ($vertexData[$iter*3+2]*-1);
+			//fprint $fileId ($vertexData[$iter*3+2]);
+			fprint $fileId "</pos>\n";
+			
+			// normals
+			fprint $fileId "\t\t\t<norm>";
+			fprint $fileId $indexedNormals[$iter*3];
+			fprint $fileId ",";
+			fprint $fileId $indexedNormals[$iter*3+1];
+			fprint $fileId ",";
+			fprint $fileId ($indexedNormals[$iter*3+2]*-1);
+			//fprint $fileId ($indexedNormals[$iter*3+2]);
+			fprint $fileId "</norm>\n";
+			
+			// skinning weights
+			if ($has_skin)
+			{
+				fprint $fileId "\t\t\t<sw>";
+				fprint $fileId $indexed_sw[$iter*4];
+				fprint $fileId ",";
+				fprint $fileId ($indexed_sw[$iter*4+1]);
+				fprint $fileId ",";
+				fprint $fileId ($indexed_sw[$iter*4+2]);
+				fprint $fileId ",";
+				fprint $fileId ($indexed_sw[$iter*4+3]);
+				fprint $fileId "</sw>\n";
+				
+				fprint $fileId "\t\t\t<si>";
+				fprint $fileId $indexed_si[$iter*4];
+				fprint $fileId ",";
+				fprint $fileId ($indexed_si[$iter*4+1]);
+				fprint $fileId ",";
+				fprint $fileId ($indexed_si[$iter*4+2]);
+				fprint $fileId ",";
+				fprint $fileId ($indexed_si[$iter*4+3]);
+				fprint $fileId "</si>\n";
+			}
+			
+			// UV
+			fprint $fileId "\t\t\t<tex>";
+			fprint $fileId $indexedUVs[$iter*2];
+			fprint $fileId ",";
+			fprint $fileId ($indexedUVs[$iter*2+1]*-1);
+			fprint $fileId "</tex>\n";
+			
+			if ($infoMessages)
+				print("vertex " + $iter + ": " + $vertexData[$iter*3] +", "+ $vertexData[$iter*3+1] +", "+ $vertexData[$iter*3+2] + "\n");
+				
+			fprint $fileId "\t\t</vtx>\n";
+			$iter++;
+		}
+		
+		fprint $fileId "\t</vertices>\n";
+
+		fprint $fileId "</itpmesh>\n";
+		fclose $fileId;
+		
+	}	
+
+	select -r $selection;
+	print("done.");
+}
+
+global proc exportAnim(string $fileName)
+{
+	// set to one to turn debug messsages on
+	int $debugOut=0;
+	// set to one to turn info messsages on
+	int $infoMessages=0;
+	string $selection[] = `ls -sl`;
+	string $obj;
+	int $objCount = `size $selection`;
+	
+	if ($objCount == 0)
+	{
+		print("Nothing selected.\n");
+		return;
+	}
+	else if ($objCount > 1)
+	{
+		print("Too many things selected. Only select the primary mesh.\n");
+		return;
+	}
+	
+	$obj = $selection[0];
+	
+	// Grab the bones
+	string $bones[];
+	string $skincluster = `findRelatedSkinCluster($obj)`;
+	float $positions[];
+	if ($skincluster == "")
+	{
+		print("Either you need to select the mesh, or this model isn't rigged.\n");
+		return;
+	}
+	
+	$bones = `skinCluster -q -inf`;
+	int $num_bones = size($bones);
+	
+	int $transpose[] = {0, 4, 8, 12,
+						1, 5, 9, 13,
+						2, 6, 10, 14,
+						3, 7, 11, 15};
+	
+	int $fileId = `fopen $fileName "w"`;
+	fprint $fileId "<?xml version='1.0' encoding='UTF-8' ?>\n";
+	fprint $fileId "<itpanim>\n";
+	
+	// Make sure we're untransformed
+	currentTime(0);
+	fprint $fileId "\t<skeleton count='";
+	fprint $fileId $num_bones;
+	fprint $fileId "'>\n";
+	int $i = 0;
+	for ($i = 0; $i < $num_bones; $i++)
+	{
+		// Bone name
+		fprint $fileId "\t\t<joint id='";
+		fprint $fileId $i;
+		fprint $fileId "' name='";
+		fprint $fileId $bones[$i];
+		fprint $fileId "' parent='";
+		// Find parent of this bone (if it exists)
+		string $parent[] = `listRelatives -p $bones[$i]`;
+		if (size($parent) == 0)
+		{
+			fprint $fileId -1;
+		}
+		else
+		{
+			// which index is this parent?
+			int $j;
+			for ($j = 0; $j < $num_bones; $j++)
+			{
+				if ($parent[0] == $bones[$j])
+				{
+					break;
+				}
+			}
+			
+			fprint $fileId $j;
+		}
+		fprint $fileId "'>\n";
+		
+		// Output the relative position of the joint
+		/*float $position[] = `joint -q -r -p $bones[$i]`;
+		$positions[$i * 3] = $position[0];
+		$positions[$i * 3 + 1] = $position[1];
+		$positions[$i * 3 + 2] = (-1*$position[2]);
+		//$positions[$i * 3 + 2] = ($position[2]);
+		fprint $fileId "\t\t\t<pos>";
+		fprint $fileId $position[0];
+		fprint $fileId ",";
+		fprint $fileId $position[1];
+		fprint $fileId ",";
+		fprint $fileId (-1*$position[2]);
+		//fprint $fileId ($position[2]);
+		fprint $fileId "</pos>\n";
+		
+		// Output orientation converted to quaternion
+		float $orientation[] = `joint -q -o $bones[$i]`;
+		
+		// convert from degrees to radians
+		float $pitch = $orientation[0] * 0.0174532925;
+		float $yaw = $orientation[1] * 0.0174532925;
+		float $roll = $orientation[2] * 0.0174532925;
+		
+		float $num9 = $roll * 0.5;
+		float $num6 = sin($num9);
+		float $num5 = cos($num9);
+		float $num8 = $pitch * 0.5;
+		float $num4 = sin($num8);
+		float $num3 = cos($num8);
+		float $num7 = $yaw * 0.5;
+		float $num2 = sin($num7);
+		float $num = cos($num7);
+		
+		fprint $fileId "\t\t\t<quat>";
+		fprint $fileId ((($num * $num4) * $num5) + (($num2 * $num3) * $num6));
+		fprint $fileId ",";
+		fprint $fileId ((($num2 * $num3) * $num5) - (($num * $num4) * $num6));
+		fprint $fileId ",";
+		fprint $fileId ((($num * $num3) * $num6) - (($num2 * $num4) * $num5));
+		fprint $fileId ",";
+		fprint $fileId ((($num * $num3) * $num5) + (($num2 * $num4) * $num6));
+		fprint $fileId "</quat>\n";*/
+		
+		// Output full matrix
+		float $matrix[] = `xform -q -m $bones[$i]`;
+		//$matrix[0] *= -1;
+		//$matrix[1] *= -1;
+		//$matrix[2] *= -1;
+		//$matrix[3] *= -1;
+		//$matrix[4] *= -1;
+		//$matrix[5] *= -1;
+		//$matrix[6] *= -1;
+		//$matrix[7] *= -1;
+		if ($i == 0)
+		{
+			$matrix[8] *= -1;
+			$matrix[9] *= -1;
+			$matrix[10] *= -1;
+			$matrix[11] *= -1;
+		}
+		//$matrix[14] *= -1;
+		
+			
+		fprint $fileId "\t\t\t<mat>";
+		int $j;
+		for ($j = 0; $j < 16; $j++)
+		{
+			fprint $fileId $matrix[$transpose[$j]];
+			if ($j != 15)
+			{
+				fprint $fileId ",";
+			}
+		}
+		fprint $fileId "</mat>\n";
+		fprint $fileId "\t\t</joint>\n";
+	}
+	
+	fprint $fileId "\t</skeleton>\n";
+	
+	// get animations
+	int $start_frame = 2;
+	int $end_frame = 22;
+	float $fps = 24.0;
+	string $anim_name = "walk";
+	
+	fprint $fileId "\t<animations>\n";
+	
+	fprint $fileId "\t\t<animation name='";
+	fprint $fileId $anim_name;
+	fprint $fileId "' length='";
+	fprint $fileId ($end_frame - $start_frame);
+	fprint $fileId "'>\n";
+	// For each bone in here
+	for ($i = 0; $i < $num_bones; $i++)
+	{
+		fprint $fileId "\t\t\t<track id='";
+		fprint $fileId $i;
+		fprint $fileId "' name='";
+		fprint $fileId $bones[$i];
+		fprint $fileId "'>\n";
+		
+		// We can assume that the first frame is a keyframe
+		int $current_frame = $start_frame;
+		
+		while ($current_frame <= $end_frame && $current_frame >= $start_frame)
+		{
+			currentTime($current_frame);
+			// Output frame info
+			fprint $fileId "\t\t\t\t<frame num='";
+			fprint $fileId (($current_frame - $start_frame));
+			fprint $fileId "'>\n";
+			// Get the relative position of the joint
+			/*float $position[] = `joint -q -r -p $bones[$i]`;
+			fprint $fileId "\t\t\t\t\t<pos>";
+			fprint $fileId ($positions[$i * 3] - $position[0]);
+			//fprint $fileId $position[0];
+			fprint $fileId ",";
+			fprint $fileId ($positions[$i * 3 + 1] - $position[1]);
+			//fprint $fileId $position[1];
+			fprint $fileId ",";
+			fprint $fileId ($positions[$i * 3 + 2] + $position[2]);
+			//fprint $fileId ($positions[$i * 3 + 2] - $position[2]);
+			//fprint $fileId $position[2];
+			fprint $fileId "</pos>\n";
+			
+			// Get the current rotation of the joint
+			float $angles[] = `joint -q -angleX $bones[$i]`;
+			float $pitch = $angles[0];
+			$pitch = $pitch * 0.0174532925;
+			$angles = `joint -q -angleY $bones[$i]`;
+			float $yaw = $angles[0];
+			$yaw = $yaw * 0.0174532925;
+			$angles = `joint -q -angleZ $bones[$i]`;
+			float $roll = $angles[0];
+			$roll = $roll * 0.0174532925;
+			
+			// We need to add to these the base orientation of the joint
+			// BAD!!
+			//float $orientation[] = `joint -q -o $bones[$i]`;
+			//$pitch = $pitch + $orientation[0] * 0.0174532925;
+			//$yaw = $yaw + $orientation[1] * 0.0174532925;
+			//$roll = $roll + $orientation[2] * 0.0174532925;
+			
+			float $num9 = $roll * 0.5;
+			float $num6 = sin($num9);
+			float $num5 = cos($num9);
+			float $num8 = $pitch * 0.5;
+			float $num4 = sin($num8);
+			float $num3 = cos($num8);
+			float $num7 = $yaw * 0.5;
+			float $num2 = sin($num7);
+			float $num = cos($num7);
+			
+			fprint $fileId "\t\t\t\t\t<quat>";
+			fprint $fileId ((($num * $num4) * $num5) + (($num2 * $num3) * $num6));
+			fprint $fileId ",";
+			fprint $fileId ((($num2 * $num3) * $num5) - (($num * $num4) * $num6));
+			fprint $fileId ",";
+			fprint $fileId ((($num * $num3) * $num6) - (($num2 * $num4) * $num5));
+			fprint $fileId ",";
+			fprint $fileId ((($num * $num3) * $num5) + (($num2 * $num4) * $num6));
+			fprint $fileId "</quat>\n";*/
+			
+			// Output full matrix
+			float $matrix[] = `xform -q -m $bones[$i]`;
+			//$matrix[0] *= -1;
+			//$matrix[1] *= -1;
+			//$matrix[2] *= -1;
+			//$matrix[3] *= -1;
+			//$matrix[4] *= -1;
+			//$matrix[5] *= -1;
+			//$matrix[6] *= -1;
+			//$matrix[7] *= -1;
+			if ($i == 0)
+			{
+				$matrix[8] *= -1;
+				$matrix[9] *= -1;
+				$matrix[10] *= -1;
+				$matrix[11] *= -1;
+			}
+			//$matrix[14] *= -1;
+			
+			fprint $fileId "\t\t\t\t\t<mat>";
+			int $j;
+			for ($j = 0; $j < 16; $j++)
+			{
+				fprint $fileId $matrix[$transpose[$j]];
+				if ($j != 15)
+				{
+					fprint $fileId ",";
+				}
+			}
+			fprint $fileId "</mat>\n";
+		
+			fprint $fileId "\t\t\t\t</frame>\n";
+			
+			$current_frame = `findKeyframe -which -next $bones[$i]`;
+		}
+		
+		fprint $fileId "\t\t\t</track>\n";
+	}
+	
+	fprint $fileId "\t\t</animation>\n";
+	
+	fprint $fileId "\t</animations>\n";
+	
+	fprint $fileId "</itpanim>\n";
+	
+	fclose $fileId;
+}
+

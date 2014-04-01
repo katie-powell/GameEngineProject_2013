@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{EEEBBF63-B580-47D8-975D-292D528E862D}</ProjectGuid>
+    <RootNamespace>game</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LibraryPath>$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d9.lib;d3dx9.lib;..\ticpp\ticppd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>d3d9.lib;d3dx9.lib;..\ticpp\ticpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\..\KATIE%27S STUFF\JUNIOR YO\Sanjay%27s Class\SVN ITP-485\trunk\engine\graphics\EffectManager.cpp" />
+    <ClCompile Include="..\engine\components\AnimComponent.cpp" />
+    <ClCompile Include="..\engine\components\MeshComponent.cpp" />
+    <ClCompile Include="..\engine\core\dbg_assert.cpp" />
+    <ClCompile Include="..\engine\core\fastmath.cpp" />
+    <ClCompile Include="..\engine\core\slowmath.cpp" />
+    <ClCompile Include="..\engine\game\GameObject.cpp" />
+    <ClCompile Include="..\engine\game\GameWorld.cpp" />
+    <ClCompile Include="..\engine\graphics\GraphicsDevice.cpp" />
+    <ClCompile Include="..\engine\graphics\MeshData.cpp" />
+    <ClCompile Include="..\engine\graphics\MeshManager.cpp" />
+    <ClCompile Include="..\engine\ini\minIni.c" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\..\KATIE%27S STUFF\JUNIOR YO\Sanjay%27s Class\SVN ITP-485\trunk\engine\graphics\EffectManager.h" />
+    <ClInclude Include="..\engine\components\AnimComponent.h" />
+    <ClInclude Include="..\engine\components\MeshComponent.h" />
+    <ClInclude Include="..\engine\core\dbg_assert.h" />
+    <ClInclude Include="..\engine\core\fastmath.h" />
+    <ClInclude Include="..\engine\core\math.h" />
+    <ClInclude Include="..\engine\core\poolalloc.h" />
+    <ClInclude Include="..\engine\core\singleton.h" />
+    <ClInclude Include="..\engine\core\slowmath.h" />
+    <ClInclude Include="..\engine\game\GameObject.h" />
+    <ClInclude Include="..\engine\game\GameWorld.h" />
+    <ClInclude Include="..\engine\graphics\GraphicsDevice.h" />
+    <ClInclude Include="..\engine\graphics\MeshData.h" />
+    <ClInclude Include="..\engine\graphics\MeshManager.h" />
+    <ClInclude Include="..\engine\ini\minGlue.h" />
+    <ClInclude Include="..\engine\ini\minIni.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\blue.fx" />
+    <None Include="data\level.ini" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

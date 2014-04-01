@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\engine\core\dbg_assert.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\engine\core\fastmath.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\engine\core\slowmath.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\engine\graphics\GraphicsDevice.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\engine\graphics\MeshData.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\engine\graphics\MeshManager.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\engine\components\MeshComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\engine\ini\minIni.c">
+      <Filter>ini</Filter>
+    </ClCompile>
+    <ClCompile Include="..\engine\game\GameObject.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\engine\game\GameWorld.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\engine\components\AnimComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\KATIE%27S STUFF\JUNIOR YO\Sanjay%27s Class\SVN ITP-485\trunk\engine\graphics\EffectManager.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\engine\core\dbg_assert.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\core\fastmath.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\core\math.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\core\poolalloc.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\core\singleton.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\core\slowmath.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\graphics\GraphicsDevice.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\graphics\MeshData.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\graphics\MeshManager.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\components\MeshComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\ini\minGlue.h">
+      <Filter>ini</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\ini\minIni.h">
+      <Filter>ini</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\game\GameObject.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\game\GameWorld.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\components\AnimComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\KATIE%27S STUFF\JUNIOR YO\Sanjay%27s Class\SVN ITP-485\trunk\engine\graphics\EffectManager.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Core">
+      <UniqueIdentifier>{30fb13f4-9bb5-4a92-b1e8-bed2a118d87a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{50773e27-e8a4-4632-958f-f2f350c95d11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components">
+      <UniqueIdentifier>{3aef17ad-a3fe-4a16-9347-fccaa48f2abf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{76af3dda-7309-4406-9b85-42377ffdc091}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ini">
+      <UniqueIdentifier>{76981972-3115-422b-8cbe-8c323e82977f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{f792f3f6-f2cc-412b-830f-a35ed07f2c90}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\level.ini">
+      <Filter>Game</Filter>
+    </None>
+    <None Include="data\blue.fx">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>
